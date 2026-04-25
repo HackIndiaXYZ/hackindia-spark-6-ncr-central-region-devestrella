@@ -389,6 +389,30 @@
             }
         }
 
+        .guard-login-btn {
+            background-color: transparent;
+            color: #10b981;
+            border: 1px solid #10b981;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .guard-login-btn:hover {
+            background-color: #10b981;
+            color: #0f172a;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
         /* Admin Login Modal CSS */
         .admin-modal {
             background: rgba(30, 41, 59, 0.95);
@@ -449,7 +473,10 @@
 <body>
     <header style="display: flex; justify-content: space-between; align-items: center;">
         <h1 style="margin: 0;">Smart Cart</h1>
-        <button class="admin-login-btn" onclick="openAdminModal()">Admin Login</button>
+        <div class="header-buttons">
+            <a href="guard.html" class="guard-login-btn">Guard Portal</a>
+            <button class="admin-login-btn" onclick="openAdminModal()">Admin Login</button>
+        </div>
     </header>
 
     <main>
