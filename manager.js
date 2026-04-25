@@ -107,6 +107,36 @@ class AuthManager {
             name: data.name
         };
     }
+
+    async logBill(billId, items, totalAmount) {
+        await this.ensureReady();
+
+        const payload = {
+            action: 'ADD_BILL',
+            billId: billId,
+            items: items,
+            total: totalAmount,
+            timestamp: Date.now()
+        };
+
+        try {
+            // We do not await the json parsing if we don't care about the result blocking the thread
+            // But fetch returns a promise, we will just fire and forget or await
+            const response = await fetch(APPSCRIPT_WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload),
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await response.json();
+            if (!data.success) {
+                console.error('[Google Sheets] Failed to log bill:', data.error);
+            } else {
+                console.log('[Google Sheets] Successfully logged bill:', billId);
+            }
+        } catch (err) {
+            console.error('[Google Sheets] Network error while logging bill:', err);
+        }
+    }
 }
 
 // Note: Node.js 18+ has built-in fetch. If running on an older version, we'd need node-fetch, 

@@ -113,6 +113,13 @@ app.post('/api/bills', (req, res) => {
 
     console.log(`[API] New Bill Generated: ${billId} | Items: ${items.length}`);
     
+    // Calculate total for the sheet
+    let total = 0;
+    items.forEach(item => total += item.price * item.quantity);
+    
+    // ASYNCHRONOUSLY push to Google Sheets (DO NOT await it, so the user doesn't wait)
+    authManager.logBill(billId, items, total).catch(err => console.error("Error logging bill to sheet:", err));
+    
     res.json({ billId, secureToken });
 });
 
