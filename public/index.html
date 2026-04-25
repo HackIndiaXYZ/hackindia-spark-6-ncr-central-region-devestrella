@@ -24,13 +24,13 @@
     <main>
         <!-- Scanner Section -->
         <section class="panel">
-            <h2>Scan Product</h2>
+            <h2 ondblclick="document.getElementById('devTestContainer').style.display = document.getElementById('devTestContainer').style.display === 'none' ? 'block' : 'none'" style="cursor: pointer;" title="Double-click to toggle Developer Mode">Scan Product</h2>
             <div id="reader"></div>
             <div id="scan-feedback">Scan feedback will appear here</div>
             <button id="resumeScanBtn" onclick="resumeScanner()" style="display: none; width: 100%; margin-top: 1rem; padding: 0.75rem; background: #10b981; color: white; border: none; border-radius: 0.5rem; font-weight: bold; cursor: pointer; font-family: 'Inter', sans-serif;">Scan Next Item</button>
             
             <!-- Developer Testing Option -->
-            <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #334155;">
+            <div id="devTestContainer" style="display: none; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #334155;">
                 <h3 style="font-size: 1rem; color: #94a3b8; margin-top: 0; margin-bottom: 0.5rem;">Developer Testing</h3>
                 <div style="display: flex; gap: 0.5rem;">
                     <input type="text" id="devTestId" placeholder="Enter Product ID to simulate..." style="flex: 1; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: white; font-family: 'Inter', sans-serif;">
@@ -61,7 +61,7 @@
             <p style="color:#94a3b8; font-size:0.875rem; margin-bottom:1.5rem;">Please sign in to continue</p>
             
             <form id="adminLoginForm">
-                <input type="text" id="adminUsername" placeholder="Full Name" required>
+                <input type="text" id="adminUsername" placeholder="Admin Username" required>
                 <input type="password" id="adminPassword" placeholder="Password" required>
                 <div id="adminErrorMsg">Invalid credentials.</div>
                 <button type="submit">Log In</button>

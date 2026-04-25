@@ -387,7 +387,8 @@
         }
 
         .btn-print { background: #10b981; color: white; }
-        .btn-close { background: #cbd5e1; color: #0f172a; }
+        .btn-close { background: #64748b; color: #f8fafc; transition: background 0.2s; }
+        .btn-close:hover { background: #475569; }
         
         @media print {
             body * { visibility: hidden; }
@@ -405,18 +406,12 @@
             cursor: pointer;
             font-weight: 600;
             transition: all 0.2s;
-            display: none; /* Hidden by default */
+            display: inline-block;
         }
 
         .admin-login-btn:hover {
             background-color: #38bdf8;
             color: #0f172a;
-        }
-
-        @media (min-width: 1024px) {
-            .admin-login-btn {
-                display: inline-block; /* Show on desktop */
-            }
         }
 
         .guard-login-btn {
@@ -441,6 +436,8 @@
             display: flex;
             gap: 1rem;
             align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         /* Admin Login Modal CSS */
