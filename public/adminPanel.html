@@ -5,16 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DevEstrella Admin Dashboard</title>
     <link rel="stylesheet" href="css/adminPanel.css">
+    <link rel="stylesheet" href="css/global.css">
 </head>
 <body>
     
 
-    <header>
-        <div>
-            <h2 style="color: #38bdf8; margin: 0; font-size: 1.2rem;">DevEstrella Admin</h2>
-            <p style="color: #94a3b8; font-size: 0.85rem; margin: 0;">Logged in as: <span id="adminNameDisplay" style="color: white; font-weight: 600;"></span></p>
+    <header class="global-header">
+        <a href="index.html" class="logo-link"><h1 class="logo-text">DevEstrella</h1></a>
+        <div class="header-right">
+            <p style="color: #94a3b8; font-size: 0.85rem; margin: 0; margin-right: 1rem;">Logged in as: <span id="adminNameDisplay" style="color: white; font-weight: 600;"></span></p>
+            <button class="logout-btn" onclick="logoutAdmin()">Secure Logout</button>
         </div>
-        <button class="logout-btn" onclick="logoutAdmin()">Secure Logout</button>
     </header>
 
     
