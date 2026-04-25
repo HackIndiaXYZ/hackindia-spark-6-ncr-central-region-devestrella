@@ -89,10 +89,25 @@
     </style>
 </head>
 <body>
-    <header>
-        <h1 style="margin:0; color:#38bdf8;">Security Checkpoint</h1>
-        <p style="margin:0; color:#94a3b8; font-size:0.875rem;">Scan digital invoices to verify payment authenticity.</p>
+    <script>
+        // AUTHENTICATION CHECK
+        const sessionStr = sessionStorage.getItem('guardSession');
+        if (!sessionStr) {
+            window.location.href = 'guardLogin.html';
+        }
+        const sessionInfo = JSON.parse(sessionStr);
+    </script>
+    <header style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1 style="margin:0; color:#38bdf8;">Security Checkpoint</h1>
+            <p style="margin:0; color:#94a3b8; font-size:0.875rem;">Active Guard: <span id="guardNameDisplay" style="color: white; font-weight: bold;"></span></p>
+        </div>
+        <button onclick="sessionStorage.removeItem('guardSession'); window.location.href='guardLogin.html';" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: bold;">Logout</button>
     </header>
+
+    <script>
+        document.getElementById('guardNameDisplay').textContent = sessionInfo.name;
+    </script>
 
     <main>
         <div class="scanner-card">

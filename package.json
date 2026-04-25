@@ -21,6 +21,8 @@
   "homepage": "https://github.com/CodeMriDub7/DevEstrella#readme",
   "dependencies": {
     "cors": "^2.8.6",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "google-auth-library": "^10.6.2",
+    "google-spreadsheet": "^5.2.0"
   }
 }

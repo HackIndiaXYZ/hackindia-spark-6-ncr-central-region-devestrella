@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Security Guards</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .bg-glow {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, rgba(15, 23, 42, 0) 70%);
+            top: -200px;
+            left: -200px;
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 3rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.5s ease-out forwards;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, #10b981, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        /* Form Styles */
+        .add-guard-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: rgba(0,0,0,0.2);
+            padding: 1.5rem;
+            border-radius: 16px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        input {
+            background: #0f172a;
+            border: 1px solid #334155;
+            padding: 0.75rem;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+
+        button {
+            grid-column: span 3;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 0.5rem;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -10px rgba(16, 185, 129, 0.5);
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid #334155;
+        }
+
+        th {
+            color: #94a3b8;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            font-size: 1rem;
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            grid-column: auto;
+            margin-top: 0;
+        }
+
+        .btn-delete:hover {
+            background: #ef4444;
+            color: white;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 2rem;
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.2s;
+            text-align: center;
+            width: 100%;
+        }
+
+        .back-link:hover {
+            color: #10b981;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #94a3b8;
+            padding: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-glow"></div>
+
+    <div class="container">
+        <h1>Manage Security Guards</h1>
+        
+        <form class="add-guard-form" id="guardForm">
+            <div class="input-group">
+                <label for="guardName">Guard Name</label>
+                <input type="text" id="guardName" required placeholder="e.g. John Doe">
+            </div>
+            <div class="input-group">
+                <label for="guardId">Guard ID</label>
+                <input type="text" id="guardId" required placeholder="e.g. G-101">
+            </div>
+            <div class="input-group">
+                <label for="guardPassword">Password</label>
+                <input type="password" id="guardPassword" required placeholder="Create a password">
+            </div>
+            <button type="submit">Add New Guard</button>
+        </form>
+
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>ID</th>
+                        <th style="text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="guardTableBody">
+                    <tr><td colspan="3" class="loading">Loading guards...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <a href="adminPanel.html" class="back-link">← Back to Command Center</a>
+    </div>
+
+    <script>
+        async function loadGuards() {
+            try {
+                const res = await fetch('/api/auth/guards');
+                const data = await res.json();
+                
+                const tbody = document.getElementById('guardTableBody');
+                
+                if (data.error) {
+                    tbody.innerHTML = `<tr><td colspan="3" style="color:#ef4444;">Error: ${data.error}</td></tr>`;
+                    return;
+                }
+
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="loading">No guards registered yet.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                data.forEach(guard => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${guard.name}</td>
+                        <td><span style="background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 4px; font-family: monospace;">${guard.id}</span></td>
+                        <td style="text-align: right;">
+                            <button class="btn-delete" onclick="deleteGuard('${guard.id}')">Remove</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error(err);
+                document.getElementById('guardTableBody').innerHTML = '<tr><td colspan="3" style="color:#ef4444;">Failed to connect to server.</td></tr>';
+            }
+        }
+
+        async function deleteGuard(id) {
+            if (!confirm(`Are you sure you want to remove guard ${id}?`)) return;
+            
+            try {
+                const res = await fetch(`/api/auth/guards/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                
+                if (data.success) {
+                    loadGuards();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (err) {
+                alert('Connection error');
+            }
+        }
+
+        document.getElementById('guardForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = e.target.querySelector('button');
+            const originalText = btn.textContent;
+            btn.textContent = 'Adding...';
+            btn.disabled = true;
+
+            const payload = {
+                name: document.getElementById('guardName').value,
+                id: document.getElementById('guardId').value,
+                password: document.getElementById('guardPassword').value
+            };
+
+            try {
+                const res = await fetch('/api/auth/addGuard', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    e.target.reset();
+                    loadGuards();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (err) {
+                alert('Connection error');
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        // Load initially
+        loadGuards();
+    </script>
+</body>
+</html>

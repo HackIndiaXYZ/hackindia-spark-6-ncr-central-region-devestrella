@@ -153,3 +153,50 @@ app.listen(PORT, () => {
     console.log(`Guard Verification Server running on http://localhost:${PORT}`);
     console.log(`OOP BillManager Initialized with Binary Search.`);
 });
+
+// ============================================================================
+// NEW AUTHENTICATION ENDPOINTS (Managed by manager.js)
+// ============================================================================
+const authManager = require('./manager.js');
+
+app.post('/api/auth/addGuard', async (req, res) => {
+    try {
+        const { name, id, password } = req.body;
+        if (!name || !id || !password) return res.status(400).json({ error: "Missing fields" });
+        
+        const result = await authManager.addGuard(name, id, password);
+        res.json(result);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
+
+app.get('/api/auth/guards', async (req, res) => {
+    try {
+        const guards = await authManager.getAllGuards();
+        res.json(guards);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
+
+app.delete('/api/auth/guards/:id', async (req, res) => {
+    try {
+        const result = await authManager.deleteGuard(req.params.id);
+        res.json(result);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { role, id, password } = req.body;
+        if (!role || !id || !password) return res.status(400).json({ error: "Missing fields" });
+
+        const result = await authManager.authenticateUser(role, id, password);
+        res.json(result);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
