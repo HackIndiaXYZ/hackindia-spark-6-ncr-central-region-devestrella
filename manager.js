@@ -6,8 +6,7 @@
 // 4. Deploy as a Web App (Access: Anyone).
 // 5. Paste the Web App URL below:
 // ============================================================================
-
-const APPSCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxDzNOsviHPhlc8nUV7ozhFsBSV9VfAMbldqnD6ve62Zd1GUMxdjIWQ77AGiQ8ErhU6/exec';
+const APPSCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxvj2K9MGu3W89kZclF-NMFf8wN9nZecPwwsl-AUiuve0FHYwuNivYmmMoabbBm19nz/exec';
 
 class AuthManager {
     constructor() {
