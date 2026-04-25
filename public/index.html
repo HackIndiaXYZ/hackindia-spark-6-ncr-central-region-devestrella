@@ -365,17 +365,92 @@
             .invoice-modal, .invoice-modal * { visibility: visible; }
             .invoice-actions { display: none; }
         }
+
+        .admin-login-btn {
+            background-color: transparent;
+            color: #38bdf8;
+            border: 1px solid #38bdf8;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: none; /* Hidden by default */
+        }
+
+        .admin-login-btn:hover {
+            background-color: #38bdf8;
+            color: #0f172a;
+        }
+
+        @media (min-width: 1024px) {
+            .admin-login-btn {
+                display: inline-block; /* Show on desktop */
+            }
+        }
+
+        /* Admin Login Modal CSS */
+        .admin-modal {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #f8fafc;
+            padding: 2.5rem;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        .admin-modal input {
+            width: 100%;
+            background: #0f172a;
+            border: 1px solid #334155;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            color: white;
+            margin-bottom: 1rem;
+            box-sizing: border-box;
+        }
+
+        .admin-modal input:focus {
+            outline: none;
+            border-color: #38bdf8;
+        }
+
+        .admin-modal button {
+            width: 100%;
+            background: linear-gradient(135deg, #38bdf8, #3b82f6);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+
+        .admin-modal-close {
+            background: transparent !important;
+            border: 1px solid #64748b !important;
+            margin-top: 0.5rem !important;
+        }
+
+        #adminErrorMsg {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
     </style>
 </head>
 
 <body>
-    <header>
-        <h1>Smart Cart</h1>
+    <header style="display: flex; justify-content: space-between; align-items: center;">
+        <h1 style="margin: 0;">Smart Cart</h1>
+        <button class="admin-login-btn" onclick="openAdminModal()">Admin Login</button>
     </header>
-
-    <nav>
-        <a href="adminPanel.html">Manage Database (Admin) →</a>
-    </nav>
 
     <main>
         <!-- Scanner Section -->
@@ -409,6 +484,22 @@
             <button class="checkout-btn" onclick="checkout()">Proceed to Checkout</button>
         </section>
     </main>
+
+    <!-- Admin Login Modal -->
+    <div class="modal-overlay" id="adminModal">
+        <div class="admin-modal">
+            <h2 style="border:none; margin-bottom:0.5rem; color:#38bdf8;">Admin Portal</h2>
+            <p style="color:#94a3b8; font-size:0.875rem; margin-bottom:1.5rem;">Please sign in to continue</p>
+            
+            <form id="adminLoginForm">
+                <input type="text" id="adminUsername" placeholder="Full Name" required>
+                <input type="password" id="adminPassword" placeholder="Password" required>
+                <div id="adminErrorMsg">Invalid credentials.</div>
+                <button type="submit">Log In</button>
+                <button type="button" class="admin-modal-close" onclick="closeAdminModal()">Cancel</button>
+            </form>
+        </div>
+    </div>
 
     <!-- Invoice Modal -->
     <div class="modal-overlay" id="invoiceModal">
@@ -785,6 +876,55 @@
                 alert("Please enter a Product ID to simulate a scan.");
             }
         }
+        // Admin Login Modal Logic
+        function openAdminModal() {
+            document.getElementById('adminModal').style.display = 'flex';
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').style.display = 'none';
+        }
+
+        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = e.target.querySelector('button[type="submit"]');
+            const errorMsg = document.getElementById('adminErrorMsg');
+            const originalText = btn.textContent;
+            
+            btn.textContent = 'Verifying...';
+            btn.disabled = true;
+            errorMsg.style.display = 'none';
+
+            const payload = {
+                username: document.getElementById('adminUsername').value,
+                password: document.getElementById('adminPassword').value
+            };
+
+            try {
+                const res = await fetch('/api/auth/adminLogin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    sessionStorage.setItem('adminSession', 'true');
+                    sessionStorage.setItem('adminName', data.name);
+                    window.location.href = 'adminPanel.html';
+                } else {
+                    errorMsg.textContent = data.message || 'Invalid credentials';
+                    errorMsg.style.display = 'block';
+                }
+            } catch (err) {
+                errorMsg.textContent = 'Connection error.';
+                errorMsg.style.display = 'block';
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        });
     </script>
 </body>
 

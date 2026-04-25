@@ -26,6 +26,35 @@
             position: relative;
         }
 
+        /* Admin Header */
+        header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: #ef4444;
+            color: white;
+        }
+
         /* Animated Background Gradients */
         .bg-glow {
             position: absolute;
@@ -165,6 +194,30 @@
     </style>
 </head>
 <body>
+    <script>
+        if (!sessionStorage.getItem('adminSession')) {
+            window.location.href = 'index.html';
+        }
+        
+        function logoutAdmin() {
+            sessionStorage.removeItem('adminSession');
+            sessionStorage.removeItem('adminName');
+            window.location.href = 'index.html';
+        }
+    </script>
+
+    <header>
+        <div>
+            <h2 style="color: #38bdf8; margin: 0; font-size: 1.2rem;">DevEstrella Admin</h2>
+            <p style="color: #94a3b8; font-size: 0.85rem; margin: 0;">Logged in as: <span id="adminNameDisplay" style="color: white; font-weight: 600;"></span></p>
+        </div>
+        <button class="logout-btn" onclick="logoutAdmin()">Secure Logout</button>
+    </header>
+
+    <script>
+        document.getElementById('adminNameDisplay').textContent = sessionStorage.getItem('adminName') || 'Admin';
+    </script>
+
     <div class="bg-glow"></div>
     <div class="bg-glow-2"></div>
 

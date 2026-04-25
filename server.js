@@ -200,3 +200,32 @@ app.post('/api/auth/login', async (req, res) => {
         res.status(400).json({ error: err.message });
     }
 });
+
+// ============================================================================
+// ADMIN AUTHENTICATION
+// ============================================================================
+const ADMIN_USERS = {
+    'Ronak Gupta': 'ronak123',
+    'Siddhant Gupta': 'siddhant123',
+    'Mirtunjay Dubey': 'mirtunjay123',
+    'Tanishka Singh Sengar': 'tanishka123'
+};
+
+app.post('/api/auth/adminLogin', (req, res) => {
+    const { username, password } = req.body;
+    
+    if (!username || !password) {
+        return res.status(400).json({ success: false, message: "Missing fields" });
+    }
+
+    // Check if user exists in hardcoded object and password matches
+    if (ADMIN_USERS[username] && ADMIN_USERS[username] === password) {
+        return res.json({ 
+            success: true, 
+            message: "Admin authentication successful", 
+            name: username 
+        });
+    }
+
+    return res.status(401).json({ success: false, message: "Invalid admin credentials" });
+});
