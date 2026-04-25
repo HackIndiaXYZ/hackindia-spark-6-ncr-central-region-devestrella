@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product QR Generator</title>
+    <!-- Include Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Include qrcode.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Include Supabase Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* Premium Dark Mode CSS */
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at top right, #1e1b4b, transparent 40%),
+                radial-gradient(circle at bottom left, #0f172a, transparent 40%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: visible;
+            /* allow dropdown to overflow card */
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        h1,
+        h2 {
+            margin-top: 0;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #cbd5e1;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        input::placeholder {
+            color: #475569;
+        }
+
+        /* Custom Autocomplete Dropdown */
+        .autocomplete-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-top: 4px;
+            max-height: 250px;
+            overflow-y: auto;
+            display: none;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
+        }
+
+        .autocomplete-item {
+            padding: 0.875rem 1rem;
+            cursor: pointer;
+            color: var(--text-main);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background 0.2s ease;
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover {
+            background: rgba(59, 130, 246, 0.25);
+        }
+
+        .autocomplete-no-match {
+            padding: 1rem;
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+        }
+
+        /* Download Button */
+        .download-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.4);
+        }
+
+        .download-btn:active {
+            transform: translateY(0);
+        }
+
+        .qr-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        #qrcode {
+            background: white;
+            padding: 1.25rem;
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+            display: none;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 0 0 8px rgba(255, 255, 255, 0.05);
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        #qrcode img {
+            display: block;
+            margin: 0 auto;
+        }
+
+        .empty-state {
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding: 2rem;
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            background: rgba(15, 23, 42, 0.3);
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            color: #475569;
+        }
+
+        .product-summary {
+            display: none;
+            width: 100%;
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            animation: fadeIn 0.5s ease forwards;
+            box-sizing: border-box;
+        }
+
+        .summary-label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .summary-value {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--primary-color);
+            letter-spacing: 0.05em;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <!-- Search Section -->
+        <div class="card">
+            <h1>Search Database</h1>
+            <p class="subtitle">Search and select a Product ID to instantly generate its QR code.</p>
+
+            <div class="form-group">
+                <label for="productID">Search ID</label>
+                <input type="text" id="productID" placeholder="Start typing to search IDs..." autocomplete="off">
+                <!-- Custom Autocomplete Dropdown -->
+                <div id="autocompleteResults" class="autocomplete-results"></div>
+            </div>
+
+            <p id="statusMsg" style="color: var(--text-muted); font-size: 0.85rem; margin-top: 1rem;">Connecting to
+                Database...</p>
+        </div>
+
+        <!-- QR Code Display Section -->
+        <div class="card qr-section">
+            <h2 style="margin-bottom: 0.5rem;">QR Code</h2>
+            <p class="subtitle" style="margin-bottom: 2rem;">Scan the code to view the Product ID.</p>
+
+            <div id="emptyState" class="empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4" />
+                </svg>
+                <p style="margin:0; font-size: 0.9rem;">No ID selected yet.<br>Search to generate.</p>
+            </div>
+
+            <div id="qrcode"></div>
+
+            <div id="productSummary" class="product-summary">
+                <span class="summary-label">Encoded ID</span>
+                <span class="summary-value" id="resID"></span>
+            </div>
+
+            <!-- Download Button -->
+            <button id="downloadBtn" class="download-btn">Download QR Image</button>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Supabase
+        const supabaseUrl = 'https://rfbcubnahrqfqnvyucmc.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmYmN1Ym5haHJxZnFudnl1Y21jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMjA3OTQsImV4cCI6MjA5MjY5Njc5NH0.lYvmXAre6h46JEI6tuaASeJOaQCFRKKbkEFOoycCNzU';
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        let allProductIDs = [];
+        const input = document.getElementById('productID');
+        const resultsContainer = document.getElementById('autocompleteResults');
+        const statusMsg = document.getElementById('statusMsg');
+
+        // Fetch IDs on page load
+        async function fetchProductsFromSupabase() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('products')
+                    .select('id');
+
+                if (error) {
+                    const exactError = error.message || error.details || "Unknown Error";
+                    statusMsg.textContent = `Setup Error: ${exactError}`;
+                    statusMsg.style.color = "#ef4444";
+                    alert(`Supabase Error: ${exactError}\n\nPlease check your table name and column name in the code.`);
+                    return;
+                }
+
+                if (data && data.length > 0) {
+                    // Extract IDs into a clean array
+                    allProductIDs = data.map(item => item.id).filter(id => id);
+                    statusMsg.textContent = `✓ Connected. ${allProductIDs.length} products ready for search.`;
+                    statusMsg.style.color = "#10b981";
+                } else {
+                    statusMsg.textContent = "No Products Found in Table";
+                }
+            } catch (err) {
+                statusMsg.textContent = "Connection Error";
+                statusMsg.style.color = "#ef4444";
+            }
+        }
+
+        // Run fetch as soon as the window loads
+        window.onload = fetchProductsFromSupabase;
+
+        // Custom Autocomplete Search Logic
+        input.addEventListener('input', function () {
+            const val = this.value.trim().toLowerCase();
+            resultsContainer.innerHTML = ''; // Clear previous
+
+            if (!val) {
+                resultsContainer.style.display = 'none';
+                return;
+            }
+
+            // Filter the fetched IDs based on what user types
+            const matches = allProductIDs.filter(id => id.toString().toLowerCase().includes(val));
+
+            if (matches.length > 0) {
+                // Display matches
+                matches.forEach(match => {
+                    const div = document.createElement('div');
+                    div.className = 'autocomplete-item';
+                    div.textContent = match;
+                    div.onclick = function () {
+                        input.value = match; // fill input
+                        resultsContainer.style.display = 'none'; // hide dropdown
+                        generateQR(match); // INSTANTLY GENERATE
+                    };
+                    resultsContainer.appendChild(div);
+                });
+            } else {
+                // Display no match found
+                const div = document.createElement('div');
+                div.className = 'autocomplete-no-match';
+                div.textContent = `No PRD found matching "${val}"`;
+                resultsContainer.appendChild(div);
+            }
+
+            resultsContainer.style.display = 'block';
+        });
+
+        // Hide dropdown if clicked outside
+        document.addEventListener('click', function (e) {
+            if (e.target !== input && e.target !== resultsContainer) {
+                resultsContainer.style.display = 'none';
+            }
+        });
+
+        // Generate QR Logic (runs instantly upon selection)
+        function generateQR(selectedID) {
+            // Clear previous QR code
+            document.getElementById('qrcode').innerHTML = "";
+
+            // Hide empty state and show QR container + Download button
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('qrcode').style.display = 'block';
+            document.getElementById('productSummary').style.display = 'block';
+            document.getElementById('downloadBtn').style.display = 'block';
+
+            // Generate new QR code
+            new QRCode(document.getElementById("qrcode"), {
+                text: selectedID,
+                width: 220,
+                height: 220,
+                colorDark: "#0f172a", // Dark slate to match theme
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H // High error correction for better scanning
+            });
+
+            // Update summary UI
+            document.getElementById('resID').textContent = selectedID;
+        }
+
+        // Download QR Code Image
+        document.getElementById('downloadBtn').addEventListener('click', function () {
+            // qrcode.js renders an <img /> or <canvas>. We grab the img src.
+            const qrImage = document.querySelector('#qrcode img');
+            const encodedID = document.getElementById('resID').textContent;
+
+            if (qrImage && qrImage.src) {
+                const a = document.createElement('a');
+                a.href = qrImage.src;
+                a.download = `QR_${encodedID}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } else {
+                // Fallback if browser forces canvas rendering
+                const canvas = document.querySelector('#qrcode canvas');
+                if (canvas) {
+                    const a = document.createElement('a');
+                    a.href = canvas.toDataURL("image/png");
+                    a.download = `QR_${encodedID}.png`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

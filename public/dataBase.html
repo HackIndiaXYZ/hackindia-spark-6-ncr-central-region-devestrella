@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Database Generator</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: #1e293b;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #10b981;
+            /* Emerald green */
+            letter-spacing: 0.5px;
+        }
+
+        nav {
+            background-color: #1e293b;
+            padding: 1rem;
+            text-align: center;
+            border-bottom: 1px solid #334155;
+        }
+
+        nav a {
+            color: #38bdf8;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0 1rem;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background-color: #1e293b;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #e2e8f0;
+            font-size: 1.25rem;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #334155;
+            background-color: #0f172a;
+            color: white;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+        }
+
+        button {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            transition: background-color 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        button:hover {
+            background-color: #059669;
+        }
+
+        .export-btn {
+            background-color: #3b82f6;
+            margin-top: 1rem;
+        }
+
+        .export-btn:hover {
+            background-color: #2563eb;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #334155;
+        }
+
+        th {
+            color: #94a3b8;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .delete-btn {
+            background-color: transparent;
+            color: #ef4444;
+            border: 1px solid #ef4444;
+            padding: 0.25rem 0.5rem;
+            width: auto;
+            font-size: 0.8rem;
+        }
+
+        .delete-btn:hover {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #64748b;
+            padding: 2rem 0;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            flex: 1;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            background-color: #1e293b;
+            color: #64748b;
+            font-size: 0.875rem;
+            border-top: 1px solid #334155;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>CSV Database Generator</h1>
+    </header>
+
+    <nav>
+        <a href="index.html">Store</a>
+        <a href="adminPanel.html">Admin Panel</a>
+    </nav>
+
+    <main>
+        <section class="panel">
+            <h2>Add Product</h2>
+            <form id="productForm">
+                <div class="form-group">
+                    <label for="productName">Product Name</label>
+                    <input type="text" id="productName" required placeholder="e.g. Wireless Mouse">
+                </div>
+                <div class="form-group">
+                    <label for="productPrice">Price ($)</label>
+                    <input type="number" id="productPrice" step="0.01" min="0" required placeholder="e.g. 29.99">
+                </div>
+                <div class="form-group">
+                    <label for="productQuantity">Quantity</label>
+                    <input type="number" id="productQuantity" min="1" required placeholder="e.g. 10">
+                </div>
+                <button type="submit">Add Product</button>
+            </form>
+        </section>
+
+        <section class="panel">
+            <h2>Products to Add</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product ID</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productTableBody">
+                        <!-- Products will be injected here -->
+                    </tbody>
+                </table>
+                <div id="emptyState" class="empty-state">
+                    No products added yet. Add some products to generate a CSV!
+                </div>
+            </div>
+
+            <button class="export-btn" id="exportBtn" style="display: none;" onclick="uploadToSupabase()">
+                Save Data to Supabase
+            </button>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 DevEstrella</p>
+    </footer>
+
+    <script>
+        // Array to store our session products before exporting
+        let csvDatabase = [];
+
+        const SUPABASE_URL = 'https://rfbcubnahrqfqnvyucmc.supabase.co/rest/v1/products';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmYmN1Ym5haHJxZnFudnl1Y21jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMjA3OTQsImV4cCI6MjA5MjY5Njc5NH0.lYvmXAre6h46JEI6tuaASeJOaQCFRKKbkEFOoycCNzU'; // ⚠️ IMPORTANT: Replace this with your actual Supabase anon key
+
+        async function saveToSupabase(newProducts) {
+            try {
+                const response = await fetch(SUPABASE_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Prefer': 'return=minimal' // Prevents returning the full inserted rows to save bandwidth
+                    },
+                    body: JSON.stringify(newProducts)
+                });
+
+                if (!response.ok) {
+                    console.error('Supabase error:', await response.text());
+                    alert('Failed to save to Supabase. Did you replace YOUR_SUPABASE_ANON_KEY_HERE with your actual key?');
+                    return false;
+                } else {
+                    console.log('Successfully saved to Supabase!');
+                    return true;
+                }
+            } catch (err) {
+                console.error('Network error:', err);
+                alert('Network error while connecting to Supabase.');
+                return false;
+            }
+        }
+
+        function generateUniqueId() {
+            let id;
+            do {
+                const randomStr = Math.floor(100000 + Math.random() * 900000).toString();
+                id = `PRD-${randomStr}`;
+            } while (csvDatabase.some(p => p.id === id));
+            return id;
+        }
+
+        function renderProducts() {
+            const tbody = document.getElementById('productTableBody');
+            const emptyState = document.getElementById('emptyState');
+            const exportBtn = document.getElementById('exportBtn');
+
+            tbody.innerHTML = '';
+
+            if (csvDatabase.length === 0) {
+                emptyState.style.display = 'block';
+                exportBtn.style.display = 'none';
+            } else {
+                emptyState.style.display = 'none';
+                exportBtn.style.display = 'block';
+
+                csvDatabase.forEach(product => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="font-family: monospace; color: #38bdf8;">${product.id}</td>
+                        <td>${product.name}</td>
+                        <td>$${parseFloat(product.price).toFixed(2)}</td>
+                        <td>${product.quantity}</td>
+                        <td>
+                            <button class="delete-btn" onclick="deleteProduct('${product.id}')">Remove</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        }
+
+        document.getElementById('productForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const name = document.getElementById('productName').value.trim();
+            const price = parseFloat(document.getElementById('productPrice').value);
+            const quantity = parseInt(document.getElementById('productQuantity').value);
+
+            // Generate multiple distinct items based on the quantity
+            const newProducts = [];
+            for (let i = 0; i < quantity; i++) {
+                const id = generateUniqueId();
+                const product = { id, name, price, quantity: 1 };
+                csvDatabase.push(product);
+                newProducts.push(product);
+            }
+
+
+            // Note: We no longer auto-save here, the user clicks "Save Data to Supabase" button
+
+            // Clear form
+            document.getElementById('productForm').reset();
+
+            // Focus back on the first input for quick data entry
+            document.getElementById('productName').focus();
+
+            // Re-render table
+            renderProducts();
+        });
+
+        function deleteProduct(id) {
+            csvDatabase = csvDatabase.filter(p => p.id !== id);
+            renderProducts();
+        }
+
+        async function uploadToSupabase() {
+            if (csvDatabase.length === 0) {
+                alert("Database is empty.");
+                return;
+            }
+
+            const btn = document.getElementById('exportBtn');
+            const originalText = btn.innerText;
+            btn.innerText = 'Saving to Supabase...';
+            btn.disabled = true;
+
+            const success = await saveToSupabase(csvDatabase);
+
+            btn.innerText = originalText;
+            btn.disabled = false;
+
+            if (success) {
+                alert("Successfully saved all items to Supabase!");
+                // Clear the table so they don't get uploaded twice
+                csvDatabase = [];
+                renderProducts();
+            }
+        }
+    </script>
+</body>
+
+</html>

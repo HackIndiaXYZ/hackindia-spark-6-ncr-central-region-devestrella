@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guard Security Dashboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header {
+            background-color: #1e293b;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        main {
+            flex: 1;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+        .scanner-card {
+            background-color: #1e293b;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+        #reader {
+            width: 100%;
+            margin-top: 1rem;
+            background-color: #000;
+        }
+        .status-box {
+            display: none;
+            width: 100%;
+            max-width: 500px;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            margin-top: 2rem;
+            animation: popIn 0.3s ease-out;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .status-box.success {
+            background-color: rgba(16, 185, 129, 0.1);
+            border: 2px solid #10b981;
+            display: block;
+        }
+        .status-box.success h2 { color: #10b981; margin-top: 0; }
+        
+        .status-box.error {
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 2px solid #ef4444;
+            display: block;
+        }
+        .status-box.error h2 { color: #ef4444; margin-top: 0; }
+
+        .items-list {
+            margin-top: 1.5rem;
+            text-align: left;
+            background: rgba(0,0,0,0.2);
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #334155;
+        }
+        .item-row:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 style="margin:0; color:#38bdf8;">Security Checkpoint</h1>
+        <p style="margin:0; color:#94a3b8; font-size:0.875rem;">Scan digital invoices to verify payment authenticity.</p>
+    </header>
+
+    <main>
+        <div class="scanner-card">
+            <h2>Scan Customer QR Code</h2>
+            <div id="reader"></div>
+            
+            <!-- Dev Option -->
+            <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #334155;">
+                <h3 style="font-size: 1rem; color: #94a3b8; margin-top: 0; margin-bottom: 0.5rem;">Manual Override (Dev)</h3>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="text" id="devToken" placeholder="Paste Secure Token..." style="flex: 1; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: white; font-family: 'Inter', sans-serif;">
+                    <button onclick="simulateScan()" style="background: #38bdf8; color: #0f172a; padding: 0.75rem 1.5rem; border: none; border-radius: 0.5rem; cursor: pointer; font-weight: bold; font-family: 'Inter', sans-serif;">Simulate</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="statusResult" class="status-box">
+            <!-- Injected by JS -->
+        </div>
+    </main>
+
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script>
+        let lastScannedCode = null;
+        let lastScanTime = 0;
+
+        async function verifyToken(token) {
+            const statusBox = document.getElementById('statusResult');
+            statusBox.className = 'status-box'; // reset
+            statusBox.innerHTML = '<h2 style="color:white;">Verifying...</h2>';
+            statusBox.style.display = 'block';
+
+            try {
+                const res = await fetch(`/api/verify/${token}`);
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    // VERIFIED GREEN
+                    let itemsHtml = '<div class="items-list"><h3>Purchased Items:</h3>';
+                    data.items.forEach(i => {
+                        itemsHtml += `<div class="item-row">
+                            <span>${i.name} <br><small style="color:#94a3b8">${i.id}</small></span>
+                            <span>Qty: ${i.quantity}</span>
+                        </div>`;
+                    });
+                    itemsHtml += '</div>';
+
+                    statusBox.className = 'status-box success';
+                    statusBox.innerHTML = `
+                        <h2>✅ VERIFIED - CLEAR TO GO</h2>
+                        <p>${data.message}</p>
+                        ${itemsHtml}
+                        <button onclick="resumeScanner()" style="width: 100%; margin-top: 1rem; padding: 0.75rem; background: #10b981; color: white; border: none; border-radius: 0.5rem; font-weight: bold; cursor: pointer; font-family: 'Inter', sans-serif;">Scan Next Bill</button>
+                    `;
+                } else {
+                    // FLAGGED RED
+                    statusBox.className = 'status-box error';
+                    statusBox.innerHTML = `
+                        <h2>❌ FLAGGED</h2>
+                        <p>${data.message}</p>
+                        <p style="margin-top:1rem; font-weight:bold;">DO NOT LET CUSTOMER PASS.</p>
+                        <button onclick="resumeScanner()" style="width: 100%; margin-top: 1rem; padding: 0.75rem; background: #ef4444; color: white; border: none; border-radius: 0.5rem; font-weight: bold; cursor: pointer; font-family: 'Inter', sans-serif;">Scan Next Bill</button>
+                    `;
+                }
+            } catch (err) {
+                statusBox.className = 'status-box error';
+                statusBox.innerHTML = `
+                    <h2>⚠️ SYSTEM ERROR</h2>
+                    <p>Could not connect to Security Server.</p>
+                    <p style="font-size:0.8rem; color:#94a3b8;">Ensure Node.js backend is running on port 3000.</p>
+                    <button onclick="resumeScanner()" style="width: 100%; margin-top: 1rem; padding: 0.75rem; background: #ef4444; color: white; border: none; border-radius: 0.5rem; font-weight: bold; cursor: pointer; font-family: 'Inter', sans-serif;">Scan Next Bill</button>
+                `;
+            }
+        }
+
+        async function onScanSuccess(decodedText, decodedResult) {
+            const now = Date.now();
+            // Prevent double scans
+            if (decodedText === lastScannedCode && (now - lastScanTime) < 3000) return;
+            
+            // PAUSE SCANNER
+            try { html5QrcodeScanner.pause(true); } catch(e) {}
+
+            lastScannedCode = decodedText;
+            lastScanTime = now;
+            
+            if (navigator.vibrate) navigator.vibrate(200);
+            
+            await verifyToken(decodedText);
+        }
+
+        function resumeScanner() {
+            try { html5QrcodeScanner.resume(); } catch(e) {}
+            document.getElementById('statusResult').style.display = 'none';
+            lastScannedCode = null;
+        }
+
+        function onScanFailure(error) {
+            // Ignored
+        }
+
+        // Initialize Scanner
+        let html5QrcodeScanner = new Html5QrcodeScanner(
+            "reader", { fps: 10, formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE] }, false
+        );
+        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+
+        function simulateScan() {
+            const token = document.getElementById('devToken').value.trim();
+            if (token) {
+                lastScannedCode = null;
+                onScanSuccess(token, null);
+                document.getElementById('devToken').value = '';
+            }
+        }
+    </script>
+</body>
+</html>
